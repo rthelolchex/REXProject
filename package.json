@@ -20,7 +20,7 @@
   },
   "homepage": "https://github.com/rthelolchex/rexproject#readme",
   "dependencies": {
-    "@adiwajshing/baileys": "github:adiwajshing/baileys",
+    "@adiwajshing/baileys": "^3.5.3",
     "@adiwajshing/baileys-md": "github:adiwajshing/baileys#multi-device",
     "@rthelolchex/genshininfo_scraper": "^1.1.6",
     "awesome-phonenumber": "^2.64.0",
