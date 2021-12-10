@@ -6,10 +6,16 @@ const WAConnection = simpleChatUpdate.WAConnection(_WAConnection)
 const fs = require('fs')
 const CFonts = require('cfonts')
 const chatHandler = require('./chatHandler')
+const messageUpsertHandler = require('./messageUpsertHandler')
 const { startspin, success, info } = require('./lib/spinner')
 const { greenBright } = require('chalk')
 const yargs = require('yargs/yargs')
 const path = require("path")
+const Readline = require('readline')
+const rl = Readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+})
 const { default: makeWASocket, useSingleFileAuthState, DisconnectReason, delay } = require('@adiwajshing/baileys-md')
 require('./lib/i18n')
 
@@ -27,6 +33,7 @@ CFonts.say('REXProject by rthelolchex', {
 global.opts = new Object(yargs(process.argv.slice(2)).exitProcess(false).parse())
 global.owner = require('./users.json').owner
 global.premium = require('./users.json').premium
+global.isMultiDevice = false
 
 async function InitializeWA() {
     global.conn = new WAConnection()
@@ -68,9 +75,18 @@ async function InitializeWA() {
 }
 
 async function InitializeWAMD() {
+    global.isMultiDevice = true
+    const NoPinoLogger = {
+        log: function () {},
+        info: function () {},
+        error: function () {},
+        trace: function () {},
+        debug: function () {}
+    }
     var loadAuthState = useSingleFileAuthState('./session_md.data.json'), state = loadAuthState.state, saveState = loadAuthState.saveState
     global.conn = makeWASocket({
         printQRInTerminal: true,
+        logger: NoPinoLogger,
         auth: state
     })
     conn.ev.on('connection.update', function (update) {
@@ -86,21 +102,14 @@ async function InitializeWAMD() {
             }
         }
         console.log('connectionUpdate', update);
+        if (update.connection === 'connecting') startspin("2", "Trying to connect.")
+        if (update.qr) info('2', "Authenticate to continue")
+        if (update.connection === 'open') success("2", "Your bot is ready!")
     })
+    conn.messageUpsertHandler = messageUpsertHandler.handler
+    conn.ev.on('messages.upsert', conn.messageUpsertHandler)
     conn.ev.on('creds.update', saveState);
-    conn.ev.on('messages.upsert', async (messageUpdate) => {
-        if (messageUpdate.type === 'prepend') return // avoid baileys-md to executing command on older messages
-        if (!messageUpdate.messages[0]) return
-        if (Object.keys(messageUpdate.messages[0].message)[0] === 'protocolMessage') return // this is sync chat recent event, ignoring it for more lighter cpu usage
-        let m = messageUpdate.messages[0]
-        if (m) {
-            m.message = (Object.keys(m.message)[0] === 'ephemeralMessage') ? m.message.ephemeralMessage.message : m.message
-            m.messageType = Object.keys(m.message)[0]
-            m.messageContent = m.message[m.messageType]
-            m.text = m.messageContent.text || m.messageContent.caption || m.messageContent
-            console.log(m)
-        }
-    })
+    
     return conn;
 }
 
@@ -120,9 +129,41 @@ async function start() {
       }
     })
     console.log(Object.keys(global.commands))
-    console.log(greenBright(`Loaded ${Object.keys(global.commands).length} commands.`))
-    if (global.opts['md']) InitializeWAMD()
-    else InitializeWA()
+    console.log(greenBright(`Loaded ${Object.keys(global.commands).length} commands.\n`))
+    let rlAnswer = false
+    function rlQuestion() {
+        rl.question("Hey owner, welcome to our script!\nWhat do you want to initialize?\n\n1. WhatsApp Web\n2. Whatsapp Web Multi-Device\n\nType : ", function(name) {
+            switch(name) {
+                case '1':
+                    rlAnswer = '1'
+                    rl.close()
+                    break
+                case '2':
+                    rlAnswer = '2'
+                    rl.close()
+                    break
+                default:
+                    console.clear()
+                    console.log("Invalid input, please try again!")
+                    return rlQuestion()
+            }
+        })
+    }
+    rlQuestion()
+    rl.on('close', function() {
+        switch (rlAnswer) {
+            case '1':
+                    console.log("Initializing WhatsApp Web...")
+                    InitializeWA()
+                    break
+                case '2':
+                    console.log("Initializing WhatsApp Web Multi-Device...")
+                    InitializeWAMD()
+                    break
+                default:
+                    process.exit(0)
+        }
+    })
     // Saving database every minute
     setInterval(async () => {
       if (global.db) await fs.writeFileSync("./database.json", JSON.stringify(global.db, null, "\t"))
