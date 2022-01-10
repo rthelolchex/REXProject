@@ -1,5 +1,7 @@
+const i18n = require('i18n')
 module.exports = {
   name: "deviceinfo",
+  description: i18n.__('info.deviceinfo.description'),
   tags: "info",
   async run(m, { conn }) {
     let phone = conn.user.phone

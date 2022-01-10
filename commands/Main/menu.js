@@ -93,8 +93,8 @@ module.exports = {
         let pushname = conn.getName(m.sender)
         let userinfo = i18n.__mf("menu.user", { pushname: pushname })
         let header = ">>> *%category* <<<"
-        let middle = "=> _*%command*_ %isMaintenance\n```%description```"
-        let footer = "<><><><><><><><><><>"
+        let middle = "▢ _*%command*_ %isMaintenance\n```%description```"
+        let footer = ">=================<"
         let help = Object.values(global.commands).filter(cmd => !cmd.disabled).map(cmd => {
             return {
                 help: Array.isArray(cmd.name) ? cmd.name.join(`, ${global.prefix}`) : [cmd.name],

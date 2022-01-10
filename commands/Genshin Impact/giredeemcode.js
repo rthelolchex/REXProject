@@ -3,6 +3,7 @@ const i18n = require("i18n")
 const util = require("util")
 module.exports = {
   name: "giredeemcode",
+  description: i18n.__('gi.redeemcode.description'),
   tags: "gi",
   async run(m, { conn, text }) {
     let user = global.db.users[m.sender]

@@ -21,7 +21,9 @@ module.exports = {
             if (html) {
                 let userData = html.data.list[0]
                 let str = `
+**********************
 Info has been founded!
+**********************
 => Nickname: ${userData.nickname}
 => UID: ${userData.game_uid}
 => AR: ${userData.level}

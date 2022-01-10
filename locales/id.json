@@ -23,9 +23,9 @@
 		"description": "Konversi foto atau video menjadi sticker.",
 		"process": "[ ⌛ ] *_Memproses sticker, tunggu._*",
 		"setwm": {
-		  "description": "Buat sebuah watermark untuk sticker anda.",
-		  "!text": "[ ❗ ] Isi teks!\nContoh: {prefix}setwm Packname|Author",
-		  "done": "Berhasil mengatur watermark."
+			"description": "Buat sebuah watermark untuk sticker anda.",
+			"!text": "[ ❗ ] Isi teks!\nContoh: {prefix}setwm Packname|Author",
+			"done": "Berhasil mengatur watermark."
 		}
 	},
 	"toimg": {
@@ -61,6 +61,12 @@
 		"linkgc": {
 			"description": "Bagikan link group."
 		},
+		"hidetag": {
+			"description": "Kirim sebuah pesan secara tag ke semua orang yang ada di group."
+		},
+		"add": {
+			"description": "Tambahkan pengguna WhatsApp ke group ini."
+		},
 		"notquotedpp": "[ ❗ ] *_Reply sebuah pesan berisi foto untuk mengubah foto profile group!_*",
 		"afterAdmin": "[ ❗ ] *_INFO : Jangan spam perintah admin, karena bisa menyebabkan nomor bot terblokir._*"
 	},
@@ -81,11 +87,23 @@
 			"description": "Claim daily check-in di akun anda (Membutuhkan cookie token)",
 			"success": "Berhasil claim daily check-in, silahkan login ke game untuk melanjutkan\nAnda mendapatkan : x{value} {item}"
 		},
+		"redeemcode": {
+			"description": "Tukar kode reedem tanpa melalui ingame atau website (Membutuhkan cookie token)"
+		},
 		"cookieNotFound": "Silahkan buat cookie untuk login akun anda, ketik {prefix}gigetcookie (paste cookie) di private chat.\nTutorial coming soon yaa"
 	},
 	"info": {
 		"isonwa": {
-			"description": "Check if a number on whatsapp."
+			"description": "Cek nomor kontak jika nomor tersebut ada di WhatsApp."
+		},
+		"owner": {
+			"description": "Kirim kontak creator bot ini."
+		},
+		"deviceinfo": {
+			"description": "Kirim status perangkat milik creator."
+		},
+		"uptime": {
+			"description": "Cek berapa lama bot telah online."
 		}
 	},
 	"support": "[ 💬 ] *_Terima kasih telah menggunakan bot ini, anda dapat donasi kami di perintah '{global.prefix}donate'_*",
@@ -132,5 +150,20 @@
 			}
 		}
 	},
-	"": ""
+	"owner": {
+		"addprem": {
+			"description": "Tambahkan pengguna bot menjadi user premium."
+		}
+	},
+	"random": {
+		"kerangajaib": {
+			"description": "Kirim jawaban random berdasarkan pertanyaan anda."
+		}
+	},
+	"": "",
+	"premium": {
+		"joingroup": {
+			"description": "Join sebuah group melalui link undangan group."
+		}
+	}
 }

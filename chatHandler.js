@@ -15,13 +15,13 @@ module.exports = {
             m.exp = 0
             m.limit = false
             try {
-              let user = global.db.users[m.sender]
+              let user = global.db.data.users[m.sender]
               if (user) {
                 if (!('name' in user)) user.name = this.getName(m.sender)
                 if (!isNumber(user.exp)) user.exp = 0
                 if (!isNumber(user.limit)) user.limit = 10
                 if (!isNumber(user.level)) user.level = 1
-              } else global.db.users[m.sender] = {
+              } else global.db.data.users[m.sender] = {
                 name: this.getName(m.sender),
                 exp: 0,
                 limit: 10,
@@ -127,13 +127,14 @@ module.exports = {
         } finally {
           let user
           if (m) {
-            if (m.sender && (user = global.db.users[m.sender])) {
+            if (m.sender && (user = global.db.data.users[m.sender])) {
               user.exp += m.exp
               user.limit -= m.limit * 1
             }
           }
         }
         try {
+            if (opts['debug']) console.log(m)
             require('./lib/messageLog')(this, m)
         } catch (e) {
             console.log(m, e)

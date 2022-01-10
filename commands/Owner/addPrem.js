@@ -3,6 +3,7 @@ const i18n = require('i18n')
 const fs = require('fs')
 module.exports = {
     name: ['addprem', 'addpremium'],
+    description: i18n.__('owner.addprem.description'),
     tags: "owner",
     rowner: true,
     async run(m, { conn }) {

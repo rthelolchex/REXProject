@@ -1,5 +1,7 @@
+const i18n = require('i18n')
 module.exports = {
   name: "apakah",
+  description: i18n.__('random.kerangajaib.description'),
   tags: "random",
   async run(m, { conn, text }) {
     let ans = ["Ya", "Tidak", "Mungkin", "Mungkin iya", "Mungkin tidak", "YNTKTS", "Tidak mungkin", "Ga ngerti bang, coba lagi wkwk"]

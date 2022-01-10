@@ -1,6 +1,8 @@
 const { MessageType } = require("@adiwajshing/baileys")
+const i18n = require("i18n")
 module.exports = {
   name: ["hidetag", "pengumuman", "announce"],
+  description: i18n.__('group.hidetag.description'),
   tags: "admin",
   group: true,
   admin: true,

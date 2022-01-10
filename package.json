@@ -21,7 +21,6 @@
   "homepage": "https://github.com/rthelolchex/rexproject#readme",
   "dependencies": {
     "@adiwajshing/baileys": "^3.5.3",
-    "@adiwajshing/baileys-md": "github:adiwajshing/baileys#multi-device",
     "@rthelolchex/genshininfo_scraper": "^1.1.6",
     "awesome-phonenumber": "^2.64.0",
     "axios": "^0.24.0",
@@ -35,6 +34,8 @@
     "glob": "^7.2.0",
     "got": "^11.8.2",
     "i18n": "^0.13.3",
+    "lodash": "^4.17.21",
+    "lowdb": "^2.1.0",
     "node-fetch": "^2.6.1",
     "node-webpmux": "2.0.0",
     "path": "^0.12.7",

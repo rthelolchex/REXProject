@@ -6,18 +6,34 @@ const WAConnection = simpleChatUpdate.WAConnection(_WAConnection)
 const fs = require('fs')
 const CFonts = require('cfonts')
 const chatHandler = require('./chatHandler')
-const messageUpsertHandler = require('./messageUpsertHandler')
 const { startspin, success, info } = require('./lib/spinner')
 const { greenBright } = require('chalk')
 const yargs = require('yargs/yargs')
 const path = require("path")
-const Readline = require('readline')
-const rl = Readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-})
-const { default: makeWASocket, useSingleFileAuthState, DisconnectReason, delay } = require('@adiwajshing/baileys-md')
 require('./lib/i18n')
+
+// Global functions
+global.opts = new Object(yargs(process.argv.slice(2)).exitProcess(false).parse())
+global.owner = require('./users.json').owner
+global.premium = require('./users.json').premium
+
+// Load database module
+// Thanks to Nurutomo for lowdb
+const cloudDBAdapter = require('./lib/cloudDBAdapter')
+const _ = require('lodash')
+var low
+try {
+  low = require('lowdb')
+} catch (e) {
+  low = require('./lib/lowdb')
+}
+const { Low, JSONFile } = low
+global.db = new Low(
+    /https?:\/\//.test(opts['db'] || '') ?
+      new cloudDBAdapter(opts['db']) :
+      new JSONFile(`${opts._[0] ? opts._[0] + '_' : ''}database.json`)
+  )
+global.DATABASE = global.db // Backwards Compatibility
 
 // Slogan when initializing the bot
 CFonts.say('REXProject', {
@@ -30,15 +46,15 @@ CFonts.say('REXProject by rthelolchex', {
     align: "center",
 })
 
-global.opts = new Object(yargs(process.argv.slice(2)).exitProcess(false).parse())
-global.owner = require('./users.json').owner
-global.premium = require('./users.json').premium
-global.isMultiDevice = false
 
+/**
+ * Initialize WhatsApp Web connection
+ */
 async function InitializeWA() {
     global.conn = new WAConnection()
+    if (opts['debug']) conn.logger.info("Debug has been enabled.")
     let authinfo = './session.data.json'
-    conn.logger.level = 'warn'
+    // conn.logger.level = 'warn'
     if (fs.existsSync(authinfo)) conn.loadAuthInfo(authinfo)
     conn.on('connecting', () => {
         if (conn.isReconnecting === true) {
@@ -59,59 +75,26 @@ async function InitializeWA() {
     conn.handler = chatHandler.handler
     conn.on('chat-update', conn.handler)
     conn.connect().then(async () => {
-      // Initialize database
-      global.db = null
-      if (!fs.existsSync("./database.json")) {
-        database = {
-          users: {},
-          chats: {},
-          stats: {}
-        }
-        fs.writeFileSync("./database.json", JSON.stringify(database, null, "\t"))
-        global.db = require("./database.json")
-      } else global.db = require("./database.json")
+        if (global.db.data == null) await loadDatabase()
         fs.writeFileSync(authinfo, JSON.stringify(conn.base64EncodedAuthInfo()), null, '\t')
     })
+    loadDatabase()
+    async function loadDatabase() {
+    await global.db.read()
+    global.db.data = {
+        users: {},
+        chats: {},
+        stats: {},
+        msgs: {},
+        sticker: {},
+        settings: {},
+        ...(global.db.data || {})
+    }
+    global.db.chain = _.chain(global.db.data)
+    }
+
 }
 
-async function InitializeWAMD() {
-    global.isMultiDevice = true
-    const NoPinoLogger = {
-        log: function () {},
-        info: function () {},
-        error: function () {},
-        trace: function () {},
-        debug: function () {}
-    }
-    var loadAuthState = useSingleFileAuthState('./session_md.data.json'), state = loadAuthState.state, saveState = loadAuthState.saveState
-    global.conn = makeWASocket({
-        printQRInTerminal: true,
-        logger: NoPinoLogger,
-        auth: state
-    })
-    conn.ev.on('connection.update', function (update) {
-        var _a, _b;
-        var connection = update.connection, lastDisconnect = update.lastDisconnect;
-        if (connection === 'close') {
-            // reconnect if not logged out
-            if (((_b = (_a = lastDisconnect.error) === null || _a === void 0 ? void 0 : _a.output) === null || _b === void 0 ? void 0 : _b.statusCode) !== DisconnectReason.loggedOut) {
-                InitializeWAMD();
-            }
-            else {
-                console.log('connection closed');
-            }
-        }
-        console.log('connectionUpdate', update);
-        if (update.connection === 'connecting') startspin("2", "Trying to connect.")
-        if (update.qr) info('2', "Authenticate to continue")
-        if (update.connection === 'open') success("2", "Your bot is ready!")
-    })
-    conn.messageUpsertHandler = messageUpsertHandler.handler
-    conn.ev.on('messages.upsert', conn.messageUpsertHandler)
-    conn.ev.on('creds.update', saveState);
-    
-    return conn;
-}
 
 async function start() {
     // Initialize commands
@@ -130,43 +113,10 @@ async function start() {
     })
     console.log(Object.keys(global.commands))
     console.log(greenBright(`Loaded ${Object.keys(global.commands).length} commands.\n`))
-    let rlAnswer = false
-    function rlQuestion() {
-        rl.question("Hey owner, welcome to our script!\nWhat do you want to initialize?\n\n1. WhatsApp Web\n2. Whatsapp Web Multi-Device\n\nType : ", function(name) {
-            switch(name) {
-                case '1':
-                    rlAnswer = '1'
-                    rl.close()
-                    break
-                case '2':
-                    rlAnswer = '2'
-                    rl.close()
-                    break
-                default:
-                    console.clear()
-                    console.log("Invalid input, please try again!")
-                    return rlQuestion()
-            }
-        })
-    }
-    rlQuestion()
-    rl.on('close', function() {
-        switch (rlAnswer) {
-            case '1':
-                    console.log("Initializing WhatsApp Web...")
-                    InitializeWA()
-                    break
-                case '2':
-                    console.log("Initializing WhatsApp Web Multi-Device...")
-                    InitializeWAMD()
-                    break
-                default:
-                    process.exit(0)
-        }
-    })
+    InitializeWA()
     // Saving database every minute
     setInterval(async () => {
-      if (global.db) await fs.writeFileSync("./database.json", JSON.stringify(global.db, null, "\t"))
+        if (global.db) await global.db.write()
     }, 60 * 1000)
 }
 
@@ -199,6 +149,6 @@ function uncache(module) {
 
 start()
 
-process.on("exit", () => {
-  if (global.db) fs.writeFileSync("./database.json", JSON.stringify(global.db, null, "\t"))
+process.on("exit", async () => {
+  if (global.db) await global.db.write()
 })

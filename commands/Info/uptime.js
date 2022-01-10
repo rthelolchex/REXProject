@@ -1,5 +1,7 @@
+const i18n = require('i18n')
 module.exports = {
   name: "uptime",
+  description: i18n.__('info.uptime.description'),
   tags: "info",
   async run(m, { conn }) {
     let _uptime = process.uptime() * 1000

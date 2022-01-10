@@ -75,6 +75,9 @@
 		},
 		"isonwa": {
 			"description": "Check if a number on whatsapp."
+		},
+		"uptime": {
+			"description": "Check how long the bot is online."
 		}
 	},
 	"support": "[ 💬 ] *_Thank you for using this bot, considering you can donate us on command '{global.prefix}donate'_*",
@@ -88,7 +91,12 @@
 	"": "",
 	"tools": {
 		"readviewonce": {
-			"description": "tools.readviewonce.description"
+			"description": "Fowarding one-time message into a media message."
+		}
+	},
+	"premium": {
+		"joingroup": {
+			"description": "Join a group with a link group invitation."
 		}
 	}
 }
